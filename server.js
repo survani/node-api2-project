@@ -10,7 +10,7 @@ server.use('/api/posts', postsRouter);
 //root of API
 server.get('/', (req, res) => {
     const messageOfTheDay = process.env.MOTD;
-    res.json(200)({message: messageOfTheDay});
+    res.send({message: messageOfTheDay});
 });
 
 module.exports = server;
