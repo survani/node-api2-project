@@ -9,9 +9,8 @@ server.use('/api/posts', postsRouter);
 
 //root of API
 server.get('/', (req, res) => {
-    res.send(`
-    <h2>Best Post API</h2>
-  `);
+    const messageOfTheDay = process.env.MOTD;
+    res.send(messageOfTheDay);
 });
 
 module.exports = server;
