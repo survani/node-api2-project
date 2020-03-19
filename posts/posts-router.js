@@ -44,6 +44,7 @@ router.get("/:id", (req, res) => {
 //Endpoint will get a specific comment according to a specific id provided ✔
 router.get("/:id/comments", (req, res) => {
   const { id } = req.params;
+
   Post.findPostComments(id)
     .then(comment => {
       if (comment) {
@@ -84,51 +85,40 @@ router.post("/", (req, res) => {
 });
 
 //Endpoint will add a comment to a specific post according to the appropriate id
-router.post('/:id/comments', (req, res) => {
-    const addBody = req.body;
-    const post_id = req.params.id; // WIP
+router.post("/:id/comments", (req, res) => {
+    const {id} = req.params;
+  const body = req.body;
+  body.post_id = id;
 
-    Post.insertComment(addBody)
-        .then(add => {
-            console.log(addBody);
-            if (addBody) {
-                res.status(201).json(addBody);
-            }
-            else {
-                res.status(404).json({ message: "The post with the specified id does not exist" });
-            }
-        })
-        .catch(err => {
-            if (!addBody.text) {
-                res.status(400).json({ errorMessage: "Please provide text for the comment" });
-            }
-            else {
-                res.status(500).json({ error: "There was an error while saving the comment to the database"});
-            }
-        })
+  Post.insertComment(body)
+      .then( postComment => {
+          if(body) {
+              console.log(body);
+              res.status(201).json(body)
+          }
+    })
 });
 
 //Endpoint will delete a specific post accoriding to a specific id provided ✔
 router.delete("/:id", (req, res) => {
   const { id } = req.params;
-  Post.findById(id)
-      .then(post => {
-        return post
-          ? Post.remove(id)
-              .then(deleted => {
-                if (deleted) {
-                  res.status(200).json(post);
-                }
-              })
-              .catch(err => {
-                res.status(500).json({
-                  error: "The post could not be removed"
-                });
-              })
-          : res.status(404).json({
-              message: "The post with the specified ID does not exist."
+  Post.findById(id).then(post => {
+    return post
+      ? Post.remove(id)
+          .then(deleted => {
+            if (deleted) {
+              res.status(200).json(post);
+            }
+          })
+          .catch(err => {
+            res.status(500).json({
+              error: "The post could not be removed"
             });
-      })
+          })
+      : res.status(404).json({
+          message: "The post with the specified ID does not exist."
+        });
+  });
 });
 
 //Enpoint will update a specific post according to a specific id provided ✔
@@ -140,16 +130,21 @@ router.put("/:id", (req, res) => {
       if (changes) {
         res.status(200).json(changes);
       } else {
-          res.status(404).json({ message: "The post with the specified ID does not exist." });
+        res
+          .status(404)
+          .json({ message: "The post with the specified ID does not exist." });
       }
-
     })
     .catch(error => {
-        if (!changes.title && !changes.contents) {
-            res.status(400).json({errorMessage: "Please provide title and contents for the post."})
-        } else {
-            res.status(500).json({error: "The post information could not be modified."});
-        }
+      if (!changes.title && !changes.contents) {
+        res.status(400).json({
+          errorMessage: "Please provide title and contents for the post."
+        });
+      } else {
+        res
+          .status(500)
+          .json({ error: "The post information could not be modified." });
+      }
     });
 });
 
